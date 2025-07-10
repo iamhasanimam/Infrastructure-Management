@@ -41,6 +41,7 @@ Console link : https://kvm18.fsn.hetzner.com/#/signin
 
 <img src="../screenshots/KVM login page.png" width="800"/>
 
+
 Once logged in to KVM console 
 
 Follow the Vmware installation on Hetzner cloud guide as mentioned in their article below: 
