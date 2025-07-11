@@ -4,7 +4,6 @@
 
 This infrastructure simulates a secure, enterprise-grade RDP access architecture using VMware ESXi as the hypervisor. It includes an RD Gateway with dual NICs, an isolated internal network, Active Directory services, and Remote Desktop Session Hosts. All components are hosted on a single bare-metal server (Hetzner) to emulate a production environment for remote desktop access in corporate settings.
 
-
 <img src="../screenshots/Project Architecture.png">
 
 ## Architecture Overview
@@ -33,8 +32,6 @@ This infrastructure simulates a secure, enterprise-grade RDP access architecture
 - **No uplink** (isolated network)
 - **Portgroup**: `Internal lab` → Used by all internal VMs
 
-___
-
 ### Virtual Machines
 
 #### 1. RDGateway (Dual NIC)
@@ -46,8 +43,6 @@ ___
   - IP: `192.168.0.6`
 - **Role**: Securely tunnels RDP from the internet to internal RDS VMs
 
-___
-
 #### 2. DC01 (Domain Controller)
 - **NIC**: `vSwitch1` → `Internal lab`
 - **IP**: `192.168.0.5`
@@ -56,8 +51,6 @@ ___
   - DNS (internal name resolution)
   - DHCP (optional)
 
-___
-
 #### 3. RDS01 (User A VM)
 - **NIC**: `vSwitch1` → `Internal lab`
 - **IP**: `192.168.0.10`
@@ -65,15 +58,12 @@ ___
 - **DNS**: `192.168.0.5` (DC01)
 - **Role**: Remote Desktop Session Host for User A
 
-___
-
 #### 4. RDS02 (User B + File Server)
 - **NIC**: `vSwitch1` → `Internal lab`
 - **IP**: `192.168.0.11`
 - **Gateway**: `192.168.0.6` (RD Gateway)
 - **DNS**: `192.168.0.5` (DC01)
 - **Role**: Remote Desktop Host + File Server
-___
 
 ## Networking Configuration (Conceptual Overview)
 
@@ -103,7 +93,6 @@ ___
 - You assigned:
   - `VM Network` and `Management Network` to vSwitch0
   - `Internal lab` to vSwitch1
-___
 
 ## Network Flow
 
@@ -113,8 +102,6 @@ ___
 -  The target RDS VM processes the session and **responds via its default gateway (`192.168.0.6`)**, which is the RD Gateway’s internal NIC.
 -  The RD Gateway re-packages the response and **sends it securely back** to the RDP client through the existing HTTPS tunnel.
 -  The internal RDS VM is never directly exposed to the internet, ensuring a secure, brokered RDP session.
-
-___
 
 ## Test Scenarios
 
@@ -158,7 +145,7 @@ ___
 - **Create HA/Cluster Setup**
   - Use multiple RD Gateways and RDS hosts in HA mode for production-like simulatio
 
-#### Screenshots from Esxi
+## Screenshots from Esxi
 
 <img src="../screenshots/Esxi Host client home page.png">
 
