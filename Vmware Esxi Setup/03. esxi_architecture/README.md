@@ -73,7 +73,6 @@ ___
 - **Gateway**: `192.168.0.6` (RD Gateway)
 - **DNS**: `192.168.0.5` (DC01)
 - **Role**: Remote Desktop Host + File Server
-
 ___
 
 ## Networking Configuration (Conceptual Overview)
@@ -104,7 +103,6 @@ ___
 - You assigned:
   - `VM Network` and `Management Network` to vSwitch0
   - `Internal lab` to vSwitch1
-
 ___
 
 ## Network Flow
@@ -115,7 +113,6 @@ ___
 -  The target RDS VM processes the session and **responds via its default gateway (`192.168.0.6`)**, which is the RD Gateway’s internal NIC.
 -  The RD Gateway re-packages the response and **sends it securely back** to the RDP client through the existing HTTPS tunnel.
 -  The internal RDS VM is never directly exposed to the internet, ensuring a secure, brokered RDP session.
-
 
 ___
 
@@ -161,6 +158,6 @@ ___
   - Install a valid SSL cert on RDGW to eliminate warning prompts for users
 
 - ⚙️ **Create HA/Cluster Setup**
-  - Use multiple RD Gateways and RDS hosts in HA mode for production-like simulation
+  - Use multiple RD Gateways and RDS hosts in HA mode for production-like simulatio
 
 ___
