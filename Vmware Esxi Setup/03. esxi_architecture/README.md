@@ -116,7 +116,7 @@ ___
 
 ___
 
-## 🧪 Test Scenarios (to be checked)
+## Test Scenarios
 
 - ✅ **RDP Access to RDS01 via RD Gateway**
   - Use an `.rdp` file or RDP client with:
@@ -138,26 +138,33 @@ ___
 - ✅ **Isolation Validation**
   - No uplink on vSwitch1 confirms backend network is isolated
 
-<br>
+## Future Improvements
 
-## 🧠 Future Improvements
-
-- 🔒 **Add pfSense or OPNsense**
+- **Add pfSense or OPNsense**
   - For more granular firewall, NAT, and VPN contro
 
-- 🌐 **Enable RRAS on RDGW**
+- **Enable RRAS on RDGW**
   - Allow NAT and internet access for internal VMs securely
 
-- 📊 **Implement Monitoring**
+- **Implement Monitoring**
   - Setup Event Log forwarding, RDP audit logs, and custom alerts
 
-- 📡 **Split RDS Roles**
+- **Split RDS Roles**
   - Separate File Server and RDS roles on RDS02 for performance
 
-- 🛡️ **Use SSL Certificates**
+- **Use SSL Certificates**
   - Install a valid SSL cert on RDGW to eliminate warning prompts for users
 
-- ⚙️ **Create HA/Cluster Setup**
+- **Create HA/Cluster Setup**
   - Use multiple RD Gateways and RDS hosts in HA mode for production-like simulatio
 
-___
+#### Screenshots from Esxi
+
+<img src="../screenshots/Esxi Host client home page.png">
+
+<img src="../screenshots/Virtual Switches.png">
+
+<img src="../screenshots/Port Groups.png">
+
+
+
