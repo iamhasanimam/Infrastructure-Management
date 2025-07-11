@@ -33,7 +33,7 @@ This infrastructure simulates a secure, enterprise-grade RDP access architecture
 - **No uplink** (isolated network)
 - **Portgroup**: `Internal lab` → Used by all internal VMs
 
----
+___
 
 ### Virtual Machines
 
@@ -46,7 +46,7 @@ This infrastructure simulates a secure, enterprise-grade RDP access architecture
   - IP: `192.168.0.6`
 - **Role**: Securely tunnels RDP from the internet to internal RDS VMs
 
----
+___
 
 #### 2. DC01 (Domain Controller)
 - **NIC**: `vSwitch1` → `Internal lab`
@@ -56,7 +56,7 @@ This infrastructure simulates a secure, enterprise-grade RDP access architecture
   - DNS (internal name resolution)
   - DHCP (optional)
 
----
+___
 
 #### 3. RDS01 (User A VM)
 - **NIC**: `vSwitch1` → `Internal lab`
@@ -65,7 +65,7 @@ This infrastructure simulates a secure, enterprise-grade RDP access architecture
 - **DNS**: `192.168.0.5` (DC01)
 - **Role**: Remote Desktop Session Host for User A
 
----
+___
 
 #### 4. RDS02 (User B + File Server)
 - **NIC**: `vSwitch1` → `Internal lab`
@@ -74,7 +74,7 @@ This infrastructure simulates a secure, enterprise-grade RDP access architecture
 - **DNS**: `192.168.0.5` (DC01)
 - **Role**: Remote Desktop Host + File Server
 
----
+___
 
 ## Networking Configuration (Conceptual Overview)
 
@@ -105,7 +105,7 @@ This infrastructure simulates a secure, enterprise-grade RDP access architecture
   - `VM Network` and `Management Network` to vSwitch0
   - `Internal lab` to vSwitch1
 
----
+___
 
 ## Network Flow
 
@@ -117,7 +117,7 @@ This infrastructure simulates a secure, enterprise-grade RDP access architecture
 -  The internal RDS VM is never directly exposed to the internet, ensuring a secure, brokered RDP session.
 
 
----
+___
 
 ## 🧪 Test Scenarios (to be checked)
 
@@ -141,7 +141,7 @@ This infrastructure simulates a secure, enterprise-grade RDP access architecture
 - ✅ **Isolation Validation**
   - No uplink on vSwitch1 confirms backend network is isolated
 
----
+___
 
 ## 🧠 Future Improvements
 
@@ -162,3 +162,5 @@ This infrastructure simulates a secure, enterprise-grade RDP access architecture
 
 - ⚙️ **Create HA/Cluster Setup**
   - Use multiple RD Gateways and RDS hosts in HA mode for production-like simulation
+
+___
