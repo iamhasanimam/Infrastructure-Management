@@ -138,12 +138,12 @@ ___
 - ✅ **Isolation Validation**
   - No uplink on vSwitch1 confirms backend network is isolated
 
-___
+<br>
 
 ## 🧠 Future Improvements
 
 - 🔒 **Add pfSense or OPNsense**
-  - For more granular firewall, NAT, and VPN control
+  - For more granular firewall, NAT, and VPN contro
 
 - 🌐 **Enable RRAS on RDGW**
   - Allow NAT and internet access for internal VMs securely
