@@ -1,4 +1,4 @@
-# Enterprise-Grade RDP Infrastructure on ESXi with RD Gateway and AD Services
+# Enterprise-Grade RDS Infrastructure on ESXi with RD Gateway and AD Services
 
 ## Objective
 
