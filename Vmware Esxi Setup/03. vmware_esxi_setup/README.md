@@ -2,7 +2,7 @@
 
 ## Objective
 
-This infrastructure simulates a secure, enterprise-grade RDP access architecture using VMware ESXi as the hypervisor. It includes an RD Gateway with dual NICs, an isolated internal network, Active Directory services, and Remote Desktop Session Hosts. All components are hosted on a single bare-metal server (Hetzner) to emulate a production environment for remote desktop access in corporate settings.
+This infrastructure simulates a secure, enterprise-grade RDS access architecture using VMware ESXi as the hypervisor. It includes an RD Gateway with dual NICs, an isolated internal network, Active Directory services, and Remote Desktop Session Hosts. All components are hosted on a single bare-metal server (Hetzner) to emulate a production environment for remote desktop access in corporate settings.
 
 <img src="../screenshots/Project Architecture.png">
 
