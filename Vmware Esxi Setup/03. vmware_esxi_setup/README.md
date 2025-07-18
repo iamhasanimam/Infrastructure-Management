@@ -139,7 +139,7 @@ Provides access to:
 - No dependency on AWS/Azure
 - Ideal for air-gapped, private, or edge environments
 
-> 🔗 This lab mirrors how real companies deploy Remote Access – from scratch, with full control over each layer.
+> This lab mirrors how real companies deploy Remote Access – from scratch, with full control over each layer.
 
 ## Screenshots from Esxi
 
