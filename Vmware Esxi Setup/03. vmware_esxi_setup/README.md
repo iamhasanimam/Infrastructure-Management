@@ -144,17 +144,13 @@ Provides access to:
 ## Screenshots from Esxi
 
 Virtual Machines
-
 <img src="../screenshots/Esxi home page.png"/>
 
 Switch
-
 <img src="../screenshots/Switch.png"/>
 
 Port Groups
-
 <img src="../screenshots/Port group.png"/>
 
 Storage
-
 <img src="../screenshots/Storage.png"/>
