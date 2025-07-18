@@ -1,157 +1,166 @@
-# Enterprise-Grade RDS Infrastructure on ESXi with RD Gateway and AD Services
+# Enterprise-Grade RDS Infrastructure on ESXi with RD Gateway and Active Directory (infra.local)
 
-## Objective
+## 🎯 Objective
 
-This infrastructure simulates a secure, enterprise-grade RDS access architecture using VMware ESXi as the hypervisor. It includes an RD Gateway with dual NICs, an isolated internal network, Active Directory services, and Remote Desktop Session Hosts. All components are hosted on a single bare-metal server (Hetzner) to emulate a production environment for remote desktop access in corporate settings.
+This infrastructure simulates a secure, enterprise-grade Remote Desktop Services (RDS) access architecture using **VMware ESXi** hosted on a **Hetzner bare-metal server**. It leverages:
 
-<img src="../screenshots/Project Architecture.png">
+- 🛡️ An RD Gateway with dual NICs for secure internet tunneling  
+- 🧠 A fully functional Active Directory (AD DS) and DNS  
+- 🖥️ Multiple RD Session Hosts (RDS01, RDS02)  
+- 🌐 A fully isolated internal network (`vSwitch1`) with no uplink for security  
+- 🔐 HTTPS-based RDP access over the internet (port 443)
 
-## Architecture Overview
+All components are orchestrated to replicate a real-world, enterprise-like remote access environment **without relying on any cloud platforms**.
 
-- **Platform**: VMware ESXi (bare-metal, hosted on Hetzner)
-- **Public Access**: Allowed only via RD Gateway over HTTPS (TCP 443)
-- **Internal Access**: Isolated subnet via `vSwitch1` (no uplink)
-- **Routing**: Handled via RD Gateway's dual NIC setup
+---
 
-## Components Breakdown
+## 🧱 Architecture Overview
 
-### ESXi Host (`static.your-server.de`)
-- **Type**: Bare-metal (Hetzner)
-- **Mgmt IP**: `138.X.X.X` (via `vmk0`)
-- **Physical NIC**: `vmnic0`
-  - MAC: `90:XX:XX:XX:XX:XX`
-  - Connected to Hetzner uplink
+| Component | Role | IP Address | Key Notes |
+|----------|------|------------|-----------|
+| **DC01** | Domain Controller, DNS | `192.168.0.3` | Root of `infra.local` |
+| **RDGW01** | RD Gateway (Dual NIC) | `Public: 138.X.X.X`, `Internal: 192.168.0.1` | Entry Point over HTTPS |
+| **RDCB01** | RD Connection Broker | `192.168.0.2` | Load Balancing brain |
+| **RDS01** | RD Session Host 1 | `192.168.0.4` | Connected to domain |
+| **RDS02** | RD Session Host 2 + File Server | `192.168.0.5` | Combined role |
+| **FS01** | Optional File/Tools Server | `192.168.0.6` | Utility server |
+| **Dedicated** | JumpBox (Direct RDP only) | `192.168.0.7` | Not part of the RD farm |
 
-#### vSwitch0 (WAN)
-- **Has uplink**
+---
+
+## 🏗️ Platform Stack
+
+- **Hypervisor**: VMware ESXi 8.0 (on Hetzner dedicated server)
+- **Virtual Networking**:
+  - `vSwitch0 (WAN)` → Has uplink to Hetzner NIC (`vmnic0`)
+  - `vSwitch1 (Internal)` → No uplink, used by all internal VMs
+
+---
+
+## 🌐 Networking Topology
+
+### 🔹 vSwitch0 (WAN)
+- **Uplink**: `vmnic0` → Hetzner Public Uplink  
 - **Portgroups**:
-  - `VM Network` → Used by RD Gateway (Public NIC)
-  - `Management Network` → Used by `vmk0`
+  - `VM Network` → Used by RDGW01's **Public NIC**
+  - `Management Network` → Used by ESXi's `vmk0` for admin access
 
-#### vSwitch1 (Internal)
-- **No uplink** (isolated network)
-- **Portgroup**: `Internal lab` → Used by all internal VMs
+### 🔹 vSwitch1 (Internal)
+- **No uplink** (air-gapped from internet)
+- Used by all VMs: DC01, RDCB01, RDS01, RDS02, FS01, JumpBox
+- RDGW01 internal NIC is the gateway to the outside world
 
-### Virtual Machines
+---
 
-#### 1. RDGateway (Dual NIC)
-- **Public NIC**:
-  - `vSwitch0` → `VM Network`
-  - IP: `138.X.X.X` (Public IP)
-- **Internal NIC**:
-  - `vSwitch1` → `Internal lab`
-  - IP: `192.168.0.6`
-- **Role**: Securely tunnels RDP from the internet to internal RDS VMs
+## 🔁 Network Flow (RDP over HTTPS)
 
-#### 2. DC01 (Domain Controller)
-- **NIC**: `vSwitch1` → `Internal lab`
-- **IP**: `192.168.0.5`
+1. 🧍 User launches an `.rdp` session using:
+   - **Gateway**: `138.X.X.X` (RDGW01)
+   - **Target**: `192.168.0.4` (RDS01)
+
+2. 🔐 RDP client creates an HTTPS tunnel to RDGW01 over port 443
+
+3. 🧠 RDGW01 validates credentials and **initiates an internal RDP session** (port 3389) to `192.168.0.4`
+
+4. 📦 RDGW01 **bridges** the external and internal sessions like a reverse proxy:
+   - Takes screen, input/output, audio, etc. from RDS01
+   - Sends it securely via HTTPS tunnel back to the client
+
+5. 🔒 The internal VM (`192.168.0.4`) is never directly exposed, ensuring complete isolation
+
+---
+
+## 🧠 Role-by-Role Breakdown
+
+### 1️⃣ DC01 – Domain Controller
+- **NIC**: Internal only (vSwitch1)
+- **IP**: `192.168.0.3`
 - **Roles**:
-  - AD DS (Active Directory Domain Services)
-  - DNS (internal name resolution)
-  - DHCP (optional)
+  - AD DS (creates and manages `infra.local`)
+  - DNS Server for internal name resolution
+  - DHCP (optional, not active in current setup)
 
-#### 3. RDS01 (User A VM)
-- **NIC**: `vSwitch1` → `Internal lab`
-- **IP**: `192.168.0.10`
-- **Gateway**: `192.168.0.6` (RD Gateway)
-- **DNS**: `192.168.0.5` (DC01)
-- **Role**: Remote Desktop Session Host for User A
+### 2️⃣ RDGW01 – RD Gateway
+- **NICs**:
+  - Public: `vSwitch0 → 138.X.X.X`
+  - Internal: `vSwitch1 → 192.168.0.1`
+- **Roles**:
+  - Accepts HTTPS connections from outside
+  - Forwards RDP traffic to internal RDS hosts
+  - NAT/Routing (RRAS optional)
+  - Can be enhanced to provide outbound NAT to internet
 
-#### 4. RDS02 (User B + File Server)
-- **NIC**: `vSwitch1` → `Internal lab`
-- **IP**: `192.168.0.11`
-- **Gateway**: `192.168.0.6` (RD Gateway)
-- **DNS**: `192.168.0.5` (DC01)
-- **Role**: Remote Desktop Host + File Server
+### 3️⃣ RDCB01 – RD Connection Broker
+- **IP**: `192.168.0.2`
+- **Role**:
+  - Maintains active RDP sessions
+  - Load balancing among RDS hosts
+  - Required for larger RDS deployments
 
-## Networking Configuration (Conceptual Overview)
+### 4️⃣ RDS01 and RDS02
+- **IPs**: `192.168.0.4` and `192.168.0.5`
+- **DNS**: Points to `192.168.0.3`
+- **Gateway**: `192.168.0.1`
+- **Roles**:
+  - RDS01: Standard RDP Host
+  - RDS02: RDP Host + File Sharing (SMB)
 
-- A **vSwitch (Virtual Switch)** in VMware ESXi acts like a physical network switch inside your hypervisor.
-- It connects:
-  - Virtual Machines (VMs)
-  - VMkernel NICs (e.g., for management)
-  - Physical NICs (vmnicX) for external traffic
+---
 
-### vSwitch0 (WAN)
-- Has an **uplink** to `vmnic0`, which connects to the physical network (Hetzner uplink).
-- Carries:
-  - `VM Network` (RD Gateway's public-facing NIC)
-  - `Management Network` (vmk0 for ESXi web UI access)
+## ✅ Test Cases
 
-### vSwitch1 (Internal)
-- No uplink → fully isolated.
-- Connects internal VMs:
-  - RDGateway (internal NIC)
-  - DC01
-  - RDS01
-  - RDS02
-- Provides east-west VM traffic without exposure to the internet.
+| Test | Expected Outcome |
+|------|------------------|
+| 🔐 RDP via RD Gateway | HTTPS tunnel → Internal session to RDS01 |
+| 📛 DNS Resolution | Internal VMs resolve names via DC01 DNS |
+| 🏢 Domain Join | RDS01, RDS02 successfully join `infra.local` |
+| 🌍 NAT Access (optional) | Internet access via RDGW01 if RRAS configured |
+| 🔒 Isolation | vSwitch1 has no uplink – full internal traffic |
+| 🚫 Public Block | Direct RDP to `192.168.0.x` from outside = blocked |
 
-### Port Groups
-- Logical containers inside a vSwitch that apply policies (VLANs, security, traffic shaping).
-- You assigned:
-  - `VM Network` and `Management Network` to vSwitch0
-  - `Internal lab` to vSwitch1
+---
 
-## Network Flow
+## 🔧 Future Enhancements
 
--  The RDP client is configured to connect to an internal server (e.g., `192.168.0.10`) **via an RD Gateway**.
--  The client first establishes a secure HTTPS tunnel to the **RD Gateway’s public IP** (e.g., `138.X.X.X`) on port **443**.
--  The RD Gateway **authenticates the user**, decrypts the tunnel, and **forwards the RDP session internally** to the target VM (`192.168.0.10`) over port **3389**.
--  The target RDS VM processes the session and **responds via its default gateway (`192.168.0.6`)**, which is the RD Gateway’s internal NIC.
--  The RD Gateway re-packages the response and **sends it securely back** to the RDP client through the existing HTTPS tunnel.
--  The internal RDS VM is never directly exposed to the internet, ensuring a secure, brokered RDP session.
+- 🔁 **Enable RRAS** on RDGW01 for internet access to internal VMs  
+- 🛡️ **Install pfSense** for advanced firewall + NAT  
+- 📊 **Monitoring**: Add EventLog Forwarding, WMI + RDP audit logs  
+- 🖥️ **Split Roles**: Decouple file server from RDS02  
+- 📜 **SSL Certs**: Apply public CA certs on RDGW01  
+- 🧯 **High Availability**: Use RD Gateway + RDS01 clusters (HA + Load Balancer)
 
-## Test Scenarios
+---
 
-- ✅ **RDP Access to RDS01 via RD Gateway**
-  - Use an `.rdp` file or RDP client with:
-    - Gateway: 138.X.X.X
-    - Target: 192.168.0.10
+## 📷 Screenshots
 
-- ✅ **DNS Resolution from RDS01/RDS02**
-  - Confirm DNS is resolving via DC01 (192.168.0.5)
+Include key screenshots for:
 
-- ✅ **Domain Join Verification**
-  - Ensure RDS VMs are successfully joined to the domain hosted by DC01
+- ESXi host setup
+- vSwitch configuration
+- DC01 AD/DNS setup
+- RDGW01 dual NIC + RRAS
+- RDS host sessions
+- DNS zones + PTR record config
+- RD Gateway Manager session bridge
 
-- ✅ **NAT & Routing Check**
-  - Internal VMs should have internet access (optional) via RDGW if RRAS is configured
+---
 
-- ✅ **Secure Gateway Tunnel**
-  - Verify that direct RDP to internal IPs from outside is blocked
+## 🧠 Why This Setup Is Valuable
 
-- ✅ **Isolation Validation**
-  - No uplink on vSwitch1 confirms backend network is isolated
+✅ **Real-World Readiness**  
+This architecture mirrors what real enterprises use to provide **secure RDP access** to internal apps/servers without exposing them directly.
 
-## Future Improvements
+✅ **Cloud-Free**  
+Simulates enterprise infra without AWS/Azure. Perfect for **air-gapped** or **regulated** environments.
 
-- **Add pfSense or OPNsense**
-  - For more granular firewall, NAT, and VPN contro
+✅ **Job-Ready Learning**  
+Covers topics like DNS, AD, RD Gateway, subnet isolation, and secure access—all critical for infra/cloud/DevOps roles.
 
-- **Enable RRAS on RDGW**
-  - Allow NAT and internet access for internal VMs securely
+---
 
-- **Implement Monitoring**
-  - Setup Event Log forwarding, RDP audit logs, and custom alerts
+## 🔗 GitHub Repository
 
-- **Split RDS Roles**
-  - Separate File Server and RDS roles on RDS02 for performance
+**Live Here**: [https://github.com/iamhasanimam/Infrastructure-Management](https://github.com/iamhasanimam/Infrastructure-Management)
 
-- **Use SSL Certificates**
-  - Install a valid SSL cert on RDGW to eliminate warning prompts for users
-
-- **Create HA/Cluster Setup**
-  - Use multiple RD Gateways and RDS hosts in HA mode for production-like simulatio
-
-## Screenshots from Esxi
-
-<img src="../screenshots/Esxi Host client home page.png">
-
-<img src="../screenshots/Virtual Switches.png">
-
-<img src="../screenshots/Port Groups.png">
-
-
+---
 
