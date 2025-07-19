@@ -114,7 +114,7 @@ Provides access to:
 - Used for file server
 
 ### Dedicated – Server
-- IP: 192.168.0.7
+- IP: Through DHCP
 - Not in RD farm; used for direct RDP for separate dedicated client
 
 
