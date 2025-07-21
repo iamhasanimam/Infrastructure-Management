@@ -25,8 +25,8 @@ It is designed to:
 | RDGW01       | RD Gateway (Dual NIC)         | 138.X.X.X / 192.168.0.1 | Public entrypoint, internal router |
 | RDCB01       | RD Connection Broker          | 192.168.0.2        | Load balances RDS01/RDS02           |
 | RDS01        | RD Session Host 1             | 192.168.0.4        | Full desktop sessions               |
-| RDS02        | RD Session Host 2 + File Srv  | 192.168.0.5        | Combines RDS + SMB roles            |
-| FS01         | Utility/File Server (Optional)| 192.168.0.6        | Admin tools, profiles, etc.         |
+| RDS02        | RD Session Host 2             | 192.168.0.5        | Full desktop sessions               |
+| FS01         | File Server                   | 192.168.0.6        | File Server                         |
 | Dedicated    | JumpBox (Direct RDP Only)     | 192.168.0.7        | Staging or external-access VM       |
 
 
