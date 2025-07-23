@@ -43,15 +43,41 @@ Write-Host "`n saved to log"
 
 All stopped or disabled services
 
-Why they’re important (some critical ones should never be stopped)
+Get-WmiObject -Class win32_service | Where-Object {$_.state -ne "running"} | Select-Object Name, DisplayName, State , StartMode
 
-Save the report to a file
+#Get-servicestatus.ps1
+
+List all service that are stopped or disabled 
+
+$logFolder = "C:\Users\ihasa\Desktop\Logs"
+$logFile = Join-Path $logFolder "service-status.txt"
+
+"===Stopped or disabled services===" | out-file -FilePath $logFile
+
+Get-WmiObject -Class win32_service | Where-Object {$_.state -ne "running"} | Select-Object Name, DisplayName, State , StartMode |  Out-File -Append $logFile
+
+Write-Host "Sevice status saved to $logFile"
+
+> We can start each service using 
+
+```
+$services = Get-Service | Where-Object { $_.Status -eq 'Stopped' }
+
+foreach ($service in $services) {
+    try {
+        Start-Service -Name $service.Name -ErrorAction Stop
+        Write-Host "Started: $($service.Name)"
+    }
+    catch {
+        Write-Warning "Error starting $($service.Name): $($_.Exception.Message)"
+    }
+}
+
+```
 
 
 
-
-
-## files modified since days
+## Files modified since days
 
 $Path = "C:\Windows"
 
