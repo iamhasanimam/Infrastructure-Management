@@ -39,17 +39,31 @@ Get-NetRoute -DestinationPrefix "0.0.0.0/0" | Select-Object NextHop, InterfaceAl
 
 Write-Host "`n saved to log"
 
+### Create a script that shows:
+
+All stopped or disabled services
+
+Why they’re important (some critical ones should never be stopped)
+
+Save the report to a file
+
+
+
 
 
 ## files modified since days
 
 $Path = "C:\Windows"
+
 $yesterday = (Get-Date).AddDays(-1)
+
 Get-ChildItem -Path $Path | Where-Object {$_.LastWriteTime -gt $yesterday}
 
 
 $Path = "C:\Windows"
+
 $since = (Get-Date).AddDays(-1)
+
 Get-ChildItem -Path $Path | Where-Object {$_.LastWriteTime -gt $since} | Select-Object Name, LastWriteTime
 
 
