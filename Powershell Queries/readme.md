@@ -93,4 +93,73 @@ $since = (Get-Date).AddDays(-1)
 Get-ChildItem -Path $Path | Where-Object {$_.LastWriteTime -gt $since} | Select-Object Name, LastWriteTime
 
 
+# Change RDP Port via PowerShell Only
+
+This guide shows how to **change the Remote Desktop Protocol (RDP) port** entirely using **PowerShell**, without manually editing the Windows Firewall or Registry.
+
+---
+
+## **1️⃣ Script to Change RDP Port**
+
+```powershell
+# Change <YourPort> to desired port number
+$NewPort = 3389
+
+# 1️⃣ Remove old custom RDP firewall rules (optional cleanup)
+Get-NetFirewallRule -DisplayName "RDP Custom Port*" -ErrorAction SilentlyContinue | Remove-NetFirewallRule
+
+# 2️⃣ Change RDP registry value
+Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' `
+-Name "PortNumber" -Value $NewPort -Type DWord
+
+# 3️⃣ Update firewall rule for RDP
+New-NetFirewallRule -DisplayName "RDP Custom Port $NewPort" `
+-Protocol TCP -LocalPort $NewPort -Direction Inbound -Action Allow
+
+# 4️⃣ Restart Remote Desktop service so change takes effect
+Stop-Service TermService -Force
+Start-Service TermService
+
+# 5️⃣ Verify RDP is listening on the new port
+Get-NetTCPConnection | Where-Object { $_.LocalPort -eq $NewPort -and $_.State -eq "Listen" }
+```
+
+---
+
+## **2️⃣ Usage**
+1. Open **PowerShell as Administrator**.
+2. Paste and run the script.
+3. Connect via RDP using:
+   ```bash
+   mstsc /v:<ServerIP>:<Port>
+   ```
+   Example:
+   ```bash
+   mstsc /v:203.0.113.25:3389
+   ```
+
+---
+
+## **3️⃣ Notes**
+- **Default RDP port**: `3389`
+- Valid custom ports: `1025–65535` (avoid ports already in use)
+- Changing the RDP port increases **security through obscurity**, but **does not replace firewall and account security**.
+- If you have a **static firewall rule for 3389**, update it or allow the new port.
+
+---
+
+## **4️⃣ Verify Current RDP Port**
+To check what port RDP is listening on:
+```powershell
+Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' PortNumber
+```
+To verify if it’s active:
+```powershell
+Get-NetTCPConnection | Where-Object { $_.State -eq "Listen" -and $_.LocalPort -ge 1024 } | Sort-Object LocalPort
+```
+
+---
+
+
+
 
